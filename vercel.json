@@ -3,6 +3,10 @@
     {
       "source": "/api-data/(.*)",
       "destination": "/api/proxy?route=$1"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
     }
   ]
 }
