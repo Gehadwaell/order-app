@@ -53,7 +53,6 @@ async function getToken() {
 }
 
 export default async function handler(req, res) {
-  // CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept");
@@ -65,11 +64,17 @@ export default async function handler(req, res) {
   try {
     const token = await getToken();
 
-    // Build D365 URL from the original path
-    // /api/proxy?path=/data/SalesOrderHeadersV3&... -> D365_BASE_URL/data/...
-    const originalUrl = req.url.replace("/api/proxy", "");
-    const d365Path = originalUrl.startsWith("/data") ? originalUrl : `/data${originalUrl}`;
-    const targetUrl = `${process.env.D365_BASE_URL}${d365Path}`;
+    // Reconstruct the full D365 URL
+    // req.query.d365path = "data/SalesOrderHeadersV3"
+    // Other query params stay in req.query too
+    const d365path = req.query.d365path || "";
+    
+    // Rebuild query string without our custom param
+    const queryParams = { ...req.query };
+    delete queryParams.d365path;
+    const qs = new URLSearchParams(queryParams).toString();
+    
+    const targetUrl = `${process.env.D365_BASE_URL}/${d365path}${qs ? "?" + qs : ""}`;
 
     const headers = {
       Authorization: `Bearer ${token}`,

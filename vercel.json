@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/api-data/:path*",
-      "destination": "/api/proxy"
+      "source": "/api-data/(.*)",
+      "destination": "/api/proxy?d365path=$1"
     }
   ]
 }
